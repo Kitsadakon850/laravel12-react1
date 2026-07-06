@@ -66,4 +66,22 @@ Route::get('/product-search', function () {
 Route::get('/music-player', function () {
     return Inertia::render('MusicPlayer'); // ชื่อตรงกับไฟล์ MusicPlayer.jsx
 });
+use App\Http\Controllers\ProductController; // (ถ้ามี Controller)
 
+// แบบง่ายที่สุด: สั่งให้ส่งข้อความกลับมาทดสอบดูก่อน
+Route::get('/product', function () {
+    return 'หน้าสินค้า (Product Page)';
+});
+Route::get('/fruit', function () {
+    return view('fruit');
+});
+
+
+Route::get('/Fruit', function () {
+    return Inertia::render('Fruit'); 
+});
+
+
+Route::get('/ProductSearch', function () {
+    return Inertia::render('ProductSearch'); 
+});
