@@ -1,9 +1,11 @@
 <?php
-
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+
+
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -67,6 +69,7 @@ Route::get('/music-player', function () {
     return Inertia::render('MusicPlayer'); // ชื่อตรงกับไฟล์ MusicPlayer.jsx
 });
 use App\Http\Controllers\ProductController; // (ถ้ามี Controller)
+use App\Models\Product;
 
 // แบบง่ายที่สุด: สั่งให้ส่งข้อความกลับมาทดสอบดูก่อน
 Route::get('/product', function () {
@@ -84,4 +87,33 @@ Route::get('/Fruit', function () {
 
 Route::get('/ProductSearch', function () {
     return Inertia::render('ProductSearch'); 
+});
+
+Route::get('/product', function () {
+   
+    return Inertia::render('ProductList', compact('products') );
+})->name('product');
+Route::get('/product', function () {
+    $products = Product::all();
+    return Inertia::render('ProductList', compact('products') );
+})->name('product');
+// routes/web.php
+Route::get('/product-others', function () {
+    return Inertia::render('ProductOthers');
+})->name('product-others');
+// routes/web.php
+Route::get('/product-others', function () {
+    return Inertia::render('ProductOthers');
+})->name('product-others');
+
+Route::get('/quiz4', function () {
+    return Inertia::render('Quiz4');
+});
+Route::get('/quiz3', function () {
+    return Inertia::render('Quiz4'); // หรือระบุชื่อ Component ของ Quiz3
+});
+
+
+Route::get('/quiz4', function () {
+    return Inertia::render('Quiz4');
 });
