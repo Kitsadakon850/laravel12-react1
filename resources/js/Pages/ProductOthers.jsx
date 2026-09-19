@@ -1,4 +1,5 @@
-...
+import React, { useState, useEffect } from "react";
+import BootstrapLayout from "@/layouts/BootstrapLayout";
 const ProductOthers = () => {
     const [products, setProducts] = useState([]);
 
