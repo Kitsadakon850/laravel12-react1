@@ -13,7 +13,8 @@
         <!-- Scripts -->
         @routes
         @viteReactRefresh
-       @vite(['resources/js/app.jsx'])
+      <!-- แก้ไขให้เหลือเฉพาะ app.jsx -->
+@vite(['resources/js/app.jsx'])
         @inertiaHead
     </head>
     <body class="font-sans antialiased">
