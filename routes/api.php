@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Student;
 use App\Models\LeaveRequest;
 use App\Http\Controllers\Api\ProductController;
@@ -28,7 +29,7 @@ Route::post('/leave-requests', function (Request $request) {
     ]);
 
     $leave = LeaveRequest::create([
-        'user_id' => $request->user_id ?? auth()->id() ?? 1,
+        'user_id' => $request->user_id ?? Auth::id() ?? 1,
         'leave_type' => $validated['leave_type'],
         'start_date' => $validated['start_date'],
         'end_date' => $validated['end_date'],
