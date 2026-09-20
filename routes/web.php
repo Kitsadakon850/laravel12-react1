@@ -6,6 +6,8 @@ use App\Models\Product;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Models\LeaveRequest;
+use Illuminate\Support\Facades\Auth;
 
 // หน้าหลัก และ Dashboard
 Route::get('/', function () {
@@ -87,4 +89,30 @@ Route::get('/quiz3', function () {
 
 Route::get('/quiz4', function () {
     return Inertia::render('Quiz4');
+});
+
+use App\Http\Controllers\WeightController;
+
+Route::get('/weights', [WeightController::class, 'index']);
+Route::post('/weights', [WeightController::class, 'store']);
+Route::put('/weights/{weight}', [WeightController::class, 'update']);
+Route::delete('/weights/{weight}', [WeightController::class, 'destroy']);
+
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/leave-management', function () {
+        $maxLeaveQuota = 30; // สิทธิ์ลาสูงสุด 30 วัน/ปี
+        $usedDays = LeaveRequest::where('user_id', Auth::id())
+            ->where('status', 'Approved')
+            ->sum('total_days');
+        
+        $remainingDays = $maxLeaveQuota - $usedDays;
+
+        return Inertia::render('LeaveManagement', [
+            'remainingDays' => $remainingDays,
+            'usedDays' => $usedDays,
+            'user' => Auth::user()
+        ]);
+    })->name('leave.index');
 });
