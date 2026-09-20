@@ -166,7 +166,8 @@ export default function LeaveManagement({ remainingDays, usedDays, user }) {
                                         </span>
                                     </td>
                                     <td className="p-2 space-x-2">
-                                        {item.status === 'Pending' && (
+                                        {/* แสดงปุ่มกดอนุมัติเฉพาะกรณีผู้ใช้เป็น admin และสถานะยังเป็น Pending */}
+                                        {user?.role === 'admin' && item.status === 'Pending' ? (
                                             <>
                                                 <button 
                                                     onClick={() => handleStatusChange(item.id, 'Approved')} 
@@ -181,6 +182,10 @@ export default function LeaveManagement({ remainingDays, usedDays, user }) {
                                                     ปฏิเสธ
                                                 </button>
                                             </>
+                                        ) : (
+                                            <span className="text-xs text-gray-400">
+                                                {user?.role === 'admin' ? '-' : 'รอแอดมินดำเนินการ'}
+                                            </span>
                                         )}
                                     </td>
                                 </tr>
