@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
 
-export default function LeaveManagement({ remainingDays, usedDays, user }) {
+export default function LeaveManagement({ remainingDays = 10, usedDays = 0, user = {} }) {
     const [leaves, setLeaves] = useState([]);
     const [formData, setFormData] = useState({
         leave_type: 'ลาป่วย',
@@ -16,7 +16,7 @@ export default function LeaveManagement({ remainingDays, usedDays, user }) {
         try {
             const res = await fetch('/api/leave-requests');
             const data = await res.json();
-            setLeaves(data);
+            setLeaves(Array.isArray(data) ? data : []);
         } catch (err) {
             console.error(err);
         }
@@ -33,7 +33,7 @@ export default function LeaveManagement({ remainingDays, usedDays, user }) {
             const res = await fetch('/api/leave-requests', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify({ ...formData, user_id: user.id })
+                body: JSON.stringify({ ...formData, user_id: user?.id })
             });
 
             if (res.ok) {
@@ -166,7 +166,6 @@ export default function LeaveManagement({ remainingDays, usedDays, user }) {
                                         </span>
                                     </td>
                                     <td className="p-2 space-x-2">
-                                        {/* แสดงปุ่มกดอนุมัติเฉพาะกรณีผู้ใช้เป็น admin และสถานะยังเป็น Pending */}
                                         {user?.role === 'admin' && item.status === 'Pending' ? (
                                             <>
                                                 <button 

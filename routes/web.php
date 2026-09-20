@@ -116,3 +116,13 @@ Route::middleware(['auth'])->group(function () {
         ]);
     })->name('leave.index');
 });
+
+use Illuminate\Http\Request;
+
+Route::get('/leave-management', function (Request $request) {
+    return Inertia::render('LeaveManagement', [
+        'user' => $request->user(), // ส่งข้อมูล user รวมถึง role
+        'remainingDays' => 10,       // กำหนดค่าเริ่มต้นวันลาคงเหลือ
+        'usedDays' => 0,            // กำหนดค่าเริ่มต้นวันลาที่ใช้
+    ]);
+})->middleware(['auth', 'verified'])->name('leave-management');
