@@ -199,23 +199,31 @@ export default function LeaveManagement({ remainingDays = 10, usedDays = 0, user
                                             </span>
                                         </td>
                                         <td className="p-2 space-x-2">
-                                            {item.status === 'Pending' ? (
-                                                <>
-                                                    <button 
-                                                        onClick={() => handleStatusChange(item.id, 'Approved')} 
-                                                        className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600"
-                                                    >
-                                                        อนุมัติ
-                                                    </button>
-                                                    <button 
-                                                        onClick={() => handleStatusChange(item.id, 'Rejected')} 
-                                                        className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
-                                                    >
-                                                        ปฏิเสธ
-                                                    </button>
-                                                </>
+                                            {/* ตรวจสอบสิทธิ์ admin และรายการที่ยัง Pending */}
+                                            {user?.role === 'admin' && item.status === 'Pending' ? (
+                                                /* ตรวจสอบว่าเป็นใบลาของตัวเองหรือไม่ */
+                                                item.user_id === user?.id ? (
+                                                    <span className="text-xs text-gray-400">รอแอดมินท่านอื่นอนุมัติ</span>
+                                                ) : (
+                                                    <>
+                                                        <button 
+                                                            onClick={() => handleStatusChange(item.id, 'Approved')} 
+                                                            className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600"
+                                                        >
+                                                            อนุมัติ
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleStatusChange(item.id, 'Rejected')} 
+                                                            className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
+                                                        >
+                                                            ปฏิเสธ
+                                                        </button>
+                                                    </>
+                                                )
                                             ) : (
-                                                <span className="text-xs text-gray-400">ดำเนินการแล้ว</span>
+                                                <span className="text-xs text-gray-400">
+                                                    {item.status === 'Pending' ? 'รอแอดมินดำเนินการ' : 'ดำเนินการแล้ว'}
+                                                </span>
                                             )}
                                         </td>
                                     </tr>
