@@ -18,7 +18,7 @@ export default function LeaveManagement({ remainingDays = 10, usedDays = 0, user
             const data = await res.json();
             setLeaves(Array.isArray(data) ? data : []);
         } catch (err) {
-            console.error(err);
+            console.error('Fetch leaves error:', err);
         }
     };
 
@@ -26,23 +26,45 @@ export default function LeaveManagement({ remainingDays = 10, usedDays = 0, user
         fetchLeaves();
     }, []);
 
+    // ฟังก์ชันดึง CSRF Token จาก คุกกี้ ของ Laravel
+    const getCsrfToken = () => {
+        const name = 'XSRF-TOKEN=';
+        const decodedCookie = decodeURIComponent(document.cookie);
+        const ca = decodedCookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i].trim();
+            if (c.indexOf(name) === 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return '';
+    };
+
     // ส่งฟอร์มยื่นคำร้อง
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const res = await fetch('/api/leave-requests', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'Accept': 'application/json',
+                    'X-XSRF-TOKEN': getCsrfToken()
+                },
                 body: JSON.stringify({ ...formData, user_id: user?.id })
             });
 
             if (res.ok) {
-                alert('ยื่นใบลาเรียบร้อย');
+                alert('ยื่นใบลาเรียบร้อยแล้ว!');
                 setFormData({ leave_type: 'ลาป่วย', start_date: '', end_date: '', reason: '' });
                 fetchLeaves();
+            } else {
+                const errData = await res.json();
+                alert('เกิดข้อผิดพลาด: ' + (errData.message || 'ไม่สามารถยื่นใบลาได้'));
             }
         } catch (err) {
-            console.error(err);
+            console.error('Submit error:', err);
+            alert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
         }
     };
 
@@ -51,15 +73,21 @@ export default function LeaveManagement({ remainingDays = 10, usedDays = 0, user
         try {
             const res = await fetch(`/api/leave-requests/${id}/status`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'Accept': 'application/json',
+                    'X-XSRF-TOKEN': getCsrfToken()
+                },
                 body: JSON.stringify({ status })
             });
 
             if (res.ok) {
                 fetchLeaves();
+            } else {
+                alert('อัปเดตสถานะไม่สำเร็จ');
             }
         } catch (err) {
-            console.error(err);
+            console.error('Status update error:', err);
         }
     };
 
@@ -150,45 +178,49 @@ export default function LeaveManagement({ remainingDays = 10, usedDays = 0, user
                             </tr>
                         </thead>
                         <tbody>
-                            {leaves.map((item) => (
-                                <tr key={item.id} className="border-b">
-                                    <td className="p-2">{item.user?.name || 'N/A'}</td>
-                                    <td className="p-2">{item.leave_type}</td>
-                                    <td className="p-2">{item.start_date} ถึง {item.end_date}</td>
-                                    <td className="p-2">{item.total_days} วัน</td>
-                                    <td className="p-2">
-                                        <span className={`px-2 py-1 rounded text-xs font-bold ${
-                                            item.status === 'Approved' ? 'bg-green-100 text-green-700' :
-                                            item.status === 'Rejected' ? 'bg-red-100 text-red-700' :
-                                            'bg-yellow-100 text-yellow-700'
-                                        }`}>
-                                            {item.status}
-                                        </span>
-                                    </td>
-                                    <td className="p-2 space-x-2">
-                                        {user?.role === 'admin' && item.status === 'Pending' ? (
-                                            <>
-                                                <button 
-                                                    onClick={() => handleStatusChange(item.id, 'Approved')} 
-                                                    className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600"
-                                                >
-                                                    อนุมัติ
-                                                </button>
-                                                <button 
-                                                    onClick={() => handleStatusChange(item.id, 'Rejected')} 
-                                                    className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
-                                                >
-                                                    ปฏิเสธ
-                                                </button>
-                                            </>
-                                        ) : (
-                                            <span className="text-xs text-gray-400">
-                                                {user?.role === 'admin' ? '-' : 'รอแอดมินดำเนินการ'}
-                                            </span>
-                                        )}
-                                    </td>
+                            {leaves.length === 0 ? (
+                                <tr>
+                                    <td colSpan="6" className="p-4 text-center text-gray-500">ยังไม่มีรายการใบลา</td>
                                 </tr>
-                            ))}
+                            ) : (
+                                leaves.map((item) => (
+                                    <tr key={item.id} className="border-b">
+                                        <td className="p-2">{item.user?.name || 'N/A'}</td>
+                                        <td className="p-2">{item.leave_type}</td>
+                                        <td className="p-2">{item.start_date} ถึง {item.end_date}</td>
+                                        <td className="p-2">{item.total_days || 1} วัน</td>
+                                        <td className="p-2">
+                                            <span className={`px-2 py-1 rounded text-xs font-bold ${
+                                                item.status === 'Approved' ? 'bg-green-100 text-green-700' :
+                                                item.status === 'Rejected' ? 'bg-red-100 text-red-700' :
+                                                'bg-yellow-100 text-yellow-700'
+                                            }`}>
+                                                {item.status}
+                                            </span>
+                                        </td>
+                                        <td className="p-2 space-x-2">
+                                            {item.status === 'Pending' ? (
+                                                <>
+                                                    <button 
+                                                        onClick={() => handleStatusChange(item.id, 'Approved')} 
+                                                        className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600"
+                                                    >
+                                                        อนุมัติ
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => handleStatusChange(item.id, 'Rejected')} 
+                                                        className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
+                                                    >
+                                                        ปฏิเสธ
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <span className="text-xs text-gray-400">ดำเนินการแล้ว</span>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>
